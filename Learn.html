@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Learn</title>
+
+    <!-- Bootstrap -->
+    <link href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="http://cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style type="text/css">
+        body{
+            padding: 0 5px 0 5px
+        }
+        #word{
+            font-family: "楷体","楷体_GB2312";
+            font-size: 4cm
+        }
+        #txtChar,#txtDesc{
+            font-family: "楷体","楷体_GB2312";
+            font-size: 1cm
+        }
+        #txtChar{
+            color: darkred;
+            font-weight: bold;
+        }
+        #txtPinyin{
+            font-size: 1cm
+        }
+        .btn-block{
+            height: 4em;
+        }
+    </style>
+  </head>
+  <body>
+    
+    <div id="word" class="text-center"></div>
+
+    <button id="btnOK" class="btn btn-success btn-lg btn-block"><span class="glyphicon glyphicon-ok"></span> 会了，下一个</button>
+    <button id="btnDontKnow" class="btn btn-danger btn-lg btn-block"><span class="glyphicon glyphicon-remove"></span> 不会，看一看</button>
+    <button id="btnRestart" class="btn btn-info btn-lg hide btn-block"><span class="glyphicon glyphicon-repeat"></span></button>
+
+    <p></p>
+    <div class="text-center">
+        <span id="selectTitle"></span>
+        练习次数:<span id="totalTimes"></span>
+        正确次数:<span id="totalOkTimes"></span>
+        正确率:<span id="totalOkRate"></span>
+    </div>
+    <table class="table table-condensed">
+        <tr>
+            <th>总字数</th>
+            <th>已练习</th>
+            <th>0~50%(糟糕)</th>
+            <th>51~80%(加油)</th>
+            <th>81~95%(不错)</th>
+            <th>95~100%(很棒)</th>
+        </tr>
+        <tr>
+            <td id="totalChars"></td>
+            <td id="playedChars"></td>
+            <td id="rate1"></td>
+            <td id="rate2"></td>
+            <td id="rate3"></td>
+            <td id="rate4"></td>
+        </tr>
+    </table>
+
+<!--学期选择对话框-->
+<div class="modal fade" id="selectDialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">请选择练习单元</h4>
+      </div>
+      <div class="modal-body">
+          <ul id="titleList" class="list-group">
+          </ul>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->    
+
+<!--看字对话框-->
+<div class="modal fade" id="myDialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title"><span id="txtChar">字</span>　<span id="txtPinyin">pinyin</span></h4>
+      </div>
+      <div class="modal-body">
+        <p id="txtDesc">说明</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">知道了</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->    
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+    <script>
+        var charList = [
+            {
+                title: "一年级上册 - 第七单元",
+                chars: [
+                    {char: "哥",pinyin: "gē",desc: "哥哥"},
+                    {char: "姐",pinyin: "jiě",desc: "姐姐"},
+                    {char: "弟",pinyin: "dì",desc: "弟弟"},
+                    {char: "叔",pinyin: "shǖ",desc: "叔叔"},
+                    {char: "爷",pinyin: "yé",desc: "爷爷"},
+                    {char: "睡",pinyin: "shuì",desc: "睡觉"},
+                    {char: "那",pinyin: "nà",desc: "那么"},
+                    {char: "海",pinyin: "hǎi",desc: "大海"},
+                    {char: "真",pinyin: "zhēn",desc: "真的"},
+                    {char: "老",pinyin: "lǎo",desc: "老师"},
+                    {char: "师",pinyin: "shī",desc: "老师"},
+                    {char: "吗",pinyin: "ma",desc: "是吗"},
+                    {char: "同",pinyin: "tóng",desc: "同学"},
+                    {char: "什",pinyin: "shén",desc: "什么"},
+                    {char: "才",pinyin: "cái",desc: "人才、刚才"},
+                    {char: "亮",pinyin: "liàng",desc: "明亮"},
+                    {char: "时",pinyin: "shí",desc: "时候"},
+                    {char: "候",pinyin: "hòu",desc: "时候"},
+                    {char: "觉",pinyin: "jué",desc: "觉得"},
+                    {char: "得",pinyin: "de",desc: "觉得"},
+                    {char: "自",pinyin: "zì",desc: "自己"},
+                    {char: "己",pinyin: "jǐ",desc: "自己"},
+                    {char: "很",pinyin: "hěn",desc: "很好"},
+                    {char: "穿",pinyin: "chuān",desc: "穿着"},
+                    {char: "衣",pinyin: "yī",desc: "衣服"},
+                    {char: "服",pinyin: "fú",desc: "衣服"},
+                    {char: "快",pinyin: "kuài",desc: "飞快"},
+                    {char: "蓝",pinyin: "lán",desc: "蓝色"},
+                    {char: "又",pinyin: "yòu",desc: "又宽又远"},
+                    {char: "笑",pinyin: "xiào",desc: "笑着"},
+                    {char: "着",pinyin: "zhe",desc: "笑着"},
+                    {char: "向",pinyin: "xiàng",desc: "方向"},
+                    {char: "和",pinyin: "hé",desc: "和气"},
+                    {char: "贝",pinyin: "bèi",desc: "贝壳"},
+                    {char: "娃",pinyin: "wá",desc: "娃娃"},
+                    {char: "挂",pinyin: "guà",desc: "挂着"},
+                    {char: "活",pinyin: "huó",desc: "快活"},
+                    {char: "金",pinyin: "jīn",desc: "金色"},
+                ]
+            },{
+                title: "一年级上册 - 第八单元",
+                chars: [
+                    {char: "群",pinyin: "qún",desc: "一群、成群"},
+                    {char: "竹",pinyin: "zhú",desc:"竹子、竹叶"},
+                    {char: "牙",pinyin: "yá",desc: "月牙、牙齿"},
+                    {char: "用",pinyin: "yòng",desc: "用处、有用"},
+                    {char: "几",pinyin: "jǐ",desc: "几个、几只"},
+                    {char: "步",pinyin: "bù",desc: "脚步、进步"},
+                    {char: "为",pinyin: "wèi",desc: "为了、为什么"},
+                    {char: "参",pinyin: "cān",desc: "参加、参与"},
+                    {char: "加",pinyin: "jiā",desc: "加法、参加"},
+                    {char: "洞",pinyin: "dòng",desc: "洞穴、山洞"},
+                    {char: "着",pinyin: "zháo",desc: "睡着、着火"},
+                    {char: "乌",pinyin: "wū",desc: "乌鸦、乌黑"},
+                    {char: "鸦",pinyin: "yā",desc: "乌鸦、涂鸦"},
+                    {char: "处",pinyin: "chù",desc: "到处、用处"},
+                    {char: "找",pinyin: "zhǎo",desc: "找到、寻找"},
+                    {char: "办",pinyin: "bàn",desc: "办法、怎么办"},
+                    {char: "旁",pinyin: "páng",desc: "旁边、一旁"},
+                    {char: "许",pinyin: "xǔ",desc: "许多、许愿"},
+                    {char: "法",pinyin: "fǎ",desc: "办法、方法"},
+                    {char: "放",pinyin: "fàng",desc: "放羊、放学"},
+                    {char: "进",pinyin: "jìn",desc: "进出、进去"},
+                    {char: "高",pinyin: "gāo",desc: "高大、高兴"},
+                    {char: "住",pinyin: "zhù",desc: "住在、居住"},
+                    {char: "孩",pinyin: "hái",desc: "孩子、小孩"},
+                    {char: "玩",pinyin: "wán",desc: "玩耍、好玩"},
+                    {char: "吧",pinyin: "ba",desc: "好吧、走吧"},
+                    {char: "发",pinyin: "fā",desc: "发现、出发"},
+                    {char: "芽",pinyin: "yá",desc: "发芽、嫩芽"},
+                    {char: "爬",pinyin: "pá",desc: "爬行、爬走"},
+                    {char: "呀",pinyin: "ya",desc: "哎呀、爬呀"},
+                    {char: "久",pinyin: "jiǔ",desc: "很久、久远"},
+                    {char: "回",pinyin: "huí",desc: "回去、回来"},
+                    {char: "全",pinyin: "quán",desc: "全对、完全"},
+                    {char: "变",pinyin: "biàn",desc: "变化、变成"},
+                    {char: "工",pinyin: "gōng",desc: "工厂、工人"},
+                    {char: "厂",pinyin: "chǎng",desc: "工厂、厂房"},
+                    {char: "医",pinyin: "yī",desc: "医生、医院"},
+                    {char: "院",pinyin: "yuàn",desc: "医院、院子"},
+                    {char: "生",pinyin: "shēng",desc: "医生、生日"},
+                ]
+            }
+        ];
+        var data = null;
+        var lastIndex = -1;
+        var totalWeight = 0;//总权重
+        
+        $(function(){
+            $('#btnRestart').click(function(){
+                Init();
+            });
+            $('#btnOK').click(function(){
+                var item = GetCurrent();
+                item.totalTimes++;
+                item.okTimes++;
+                if(item.weight>1) item.weight--;//做对了减少权重
+                GetNextChar();
+            });
+            $('#btnDontKnow').click(function(){
+                var item = GetCurrent();
+                item.totalTimes++;
+                item.weight+=5;//不会做增加权重
+                $('#txtChar').text(item.char);
+                $('#txtPinyin').text(item.pinyin);
+                $('#txtDesc').text(item.desc);
+                $('#myDialog').modal("show");
+            });
+            $('#myDialog').on('hidden.bs.modal', function (e) {
+                GetNextChar();
+            })
+            Init();
+        });
+
+        function Init(){
+            //构造选择列表
+            for(var i=0;i<charList.length;i++){
+                $('#titleList').append('<li class="list-group-item">'+charList[i].title+'</li>')
+            }
+            $('#titleList li:first').addClass('active')
+            //绑定选中事件
+            $('#titleList li').click(function(){
+                for(var i=0;i<charList.length;i++){
+                    if(charList[i].title==$(this).text()){
+                        data = charList[i].chars;//获取选中数据
+                        $('#selectTitle').text(charList[i].title);
+                    }
+                }
+                $('#selectDialog').modal('hide');//隐藏选择对话框
+            });
+            //显示选择对话框
+            $('#selectDialog').modal('show');
+            //选中隐藏后初始化
+            $('#selectDialog').on('hidden.bs.modal', function (e) {
+                if(!data){
+                    data = charList[0].chars;
+                    $('#selectTitle').text(charList[0].title);
+                }
+                for(var i=0;i<data.length;i++){
+                    data[i].totalTimes = 0;//总显示次数
+                    data[i].okTimes = 0;//正确次数
+                    data[i].weight = 1;//权重，默认为1
+                }
+                totalWeight = data.length;
+                $('#totalChars').text(data.length);
+                GetNextChar();
+            });
+        }
+        function GetCurrent(){
+            return data[lastIndex];
+        }
+        function GetNextChar(){
+            FlushDashboard();
+            var index = lastIndex;
+            while(index == lastIndex){
+                var pos = GetRandom(0, totalWeight);//获取一个总权重范围内的随机指针
+                var sum = 0;
+                for(var i=0;i<data.length;i++){
+                    sum+=data[i].weight;//遍历累加权重
+                    if(pos<sum){//判断指针是否位于当前项目权重区间
+                        index = i;
+                        break;
+                    }
+                }
+            }
+            lastIndex = index;
+            $('#word').text(data[index].char);
+        }
+        function FlushDashboard(){
+            totalWeight = 0;
+            var totalTimes = 0;
+            var tatalOkTimes = 0;
+            var playedChars = 0;
+            var rate1 = 0;
+            var rate2 = 0;
+            var rate3 = 0;
+            var rate4 = 0;
+            for(var i=0;i<data.length;i++){
+                var item = data[i];
+                totalTimes += item.totalTimes;
+                tatalOkTimes += item.okTimes;
+                totalWeight += item.weight;
+                if(item.totalTimes>0){
+                    playedChars++;
+                    var rate = parseInt(item.okTimes*100/item.totalTimes);
+                    if(rate<51){
+                        rate1++;
+                    }else if(rate<81){
+                        rate2++;
+                    }else if(rate<95){
+                        rate3++;
+                    }else{
+                        rate4++;
+                    }
+                }
+            }
+            $('#totalTimes').text(totalTimes);
+            $('#totalOkTimes').text(tatalOkTimes);
+            if(totalTimes>0){
+                $('#totalOkRate').text(parseInt(tatalOkTimes*100/totalTimes) + "%");
+            }
+            $('#playedChars').text(playedChars);
+            $('#rate1').text(rate1);
+            $('#rate2').text(rate2);
+            $('#rate3').text(rate3);
+            $('#rate4').text(rate4);
+        }
+        //not include max
+        function GetRandom(min, max){
+            var diff = max - min;
+            var num = Math.random()*diff + min;
+            return parseInt(num, 10);
+        }
+    </script>
+  </body>
+</html>
